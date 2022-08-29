@@ -5,12 +5,18 @@ import async from 'async';
 import { globby } from 'globby';
 import colors from 'tailwindcss/colors.js'
 
+try {
+  await fs.mkdir('./output') 
+} catch (error) {
+
+}
+
 await createSet('boring_black-on-white', '#ffffff', '#000000')
 await createSet('boring_white-on-black', '#000000', '#ffffff')
 
 Object.keys(colors).forEach((colorName) => {
   if (['lightBlue', 'warmGray', 'trueGray', 'coolGray', 'blueGray'].includes(colorName)) {
-    // deprecated
+    // deprecated & renamed
     return;
   }
 
