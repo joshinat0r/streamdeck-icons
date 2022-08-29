@@ -5,14 +5,19 @@ import async from 'async';
 import { globby } from 'globby';
 import colors from 'tailwindcss/colors.js'
 
+const TAILWIND_TINTS = [300, 800] // TailwindCSS color tints for light and dark (the bg-red-300 stuff)
+const BACKGROUND_SIZE = 72 // size of the background, 72x72 is what Elgato recommends
+const ICON_SIZE = 50 // size of the icon, will be centered on the background
+const WHITELIST = [] // leave empty to generate all colors, fill to only generate those colors
+
 try {
   await fs.mkdir('./output') 
 } catch (error) {
 
 }
 
-await createSet('boring_black-on-white', '#ffffff', '#000000')
-await createSet('boring_white-on-black', '#000000', '#ffffff')
+await createSet('_black-on-white', '#ffffff', '#000000')
+await createSet('_white-on-black', '#000000', '#ffffff')
 
 Object.keys(colors).forEach((colorName) => {
   if (['lightBlue', 'warmGray', 'trueGray', 'coolGray', 'blueGray'].includes(colorName)) {
@@ -25,13 +30,16 @@ Object.keys(colors).forEach((colorName) => {
     return;
   }
 
-  const tailwindTones = [800, 300]
-  const iconColors = [{
-    hex: colors[colorName][tailwindTones[0]],
-    text: tailwindTones[0]
+  if (WHITELIST.length != 0 && !WHITELIST.includes(colorName)) {
+    return;
+  }
+
+  const colorSet = [{
+    hex: colors[colorName][TAILWIND_TINTS[0]],
+    text: 'light'
   }, {
-    hex: colors[colorName][tailwindTones[1]],
-    text: tailwindTones[1]
+    hex: colors[colorName][TAILWIND_TINTS[1]],
+    text: 'dark'
   }, {
     hex: '#ffffff',
     text: 'white'
@@ -40,8 +48,8 @@ Object.keys(colors).forEach((colorName) => {
     text: 'black'
   }]
 
-  async.forEach(iconColors, async (iconColor) => {
-    async.forEach(iconColors, async (backgroundColor) => {
+  async.forEach(colorSet, async (iconColor) => {
+    async.forEach(colorSet, async (backgroundColor) => {
       if ((backgroundColor.hex == iconColor.hex) || (backgroundColor.hex == '#ffffff' && iconColor.hex == '#000000') || (backgroundColor.hex == '#000000' && iconColor.hex == '#ffffff')) {
         // no BoW, WoB, BoB or WoW
         return;
@@ -91,8 +99,8 @@ async function generateIcon(outputPath, iconPath, bgColor, iconColor) {
   try {
     const icon = await sharp(iconBuffer)
     .resize({
-      height: 50,
-      width: 50,
+      height: ICON_SIZE,
+      width: ICON_SIZE,
       fit: 'contain',
       background: { r: 0, g: 0, b: 0, alpha: 0 }
     })
@@ -100,8 +108,8 @@ async function generateIcon(outputPath, iconPath, bgColor, iconColor) {
 
     await sharp({
       create: {
-        width: 72,
-        height: 72,
+        width: BACKGROUND_SIZE,
+        height: BACKGROUND_SIZE,
         channels: 4,
         background: bgColor
       }
