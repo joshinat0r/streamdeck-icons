@@ -11,15 +11,15 @@ const ICON_SIZE = 50 // size of the icon, will be centered on the background
 const WHITELIST = [] // leave empty to generate all colors, fill to only generate those colors
 
 try {
-  await fs.mkdir('./output') 
+  await fs.mkdir('./output')
 } catch (error) {
 
 }
 
-await createSet('_black-on-white', '#ffffff', '#000000')
-await createSet('_white-on-black', '#000000', '#ffffff')
+await createSet(`_black-on-white_${ICON_SIZE}px`, '#ffffff', '#000000')
+await createSet(`_white-on-black_${ICON_SIZE}px`, '#000000', '#ffffff')
 
-Object.keys(colors).forEach((colorName) => {
+Object.keys(colors).forEach(async (colorName) => {
   if (['lightBlue', 'warmGray', 'trueGray', 'coolGray', 'blueGray'].includes(colorName)) {
     // deprecated & renamed
     return;
@@ -32,6 +32,12 @@ Object.keys(colors).forEach((colorName) => {
 
   if (WHITELIST.length != 0 && !WHITELIST.includes(colorName)) {
     return;
+  }
+
+  try {
+    await fs.mkdir(`./output/${colorName}_${ICON_SIZE}px`)
+  } catch (error) {
+ 
   }
 
   const colorSet = [{
@@ -55,7 +61,7 @@ Object.keys(colors).forEach((colorName) => {
         return;
       }
 
-      await createSet(`${colorName}_${iconColor.text}-on-${backgroundColor.text}`, backgroundColor.hex, iconColor.hex)
+      await createSet(`${colorName}_${ICON_SIZE}px/${iconColor.text}-on-${backgroundColor.text}`, backgroundColor.hex, iconColor.hex)
     })
   })
 })
